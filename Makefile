@@ -1,7 +1,4 @@
-client: buffer.o client.c connectsock.o connectTCP.o
-	gcc -Wall -g -lpthread $^ -o $@.out
-
-client2: client2.c buffer.o
+client: buffer.o client.c
 	gcc -Wall -g -lpthread $^ -o $@.out
 
 %.o: %.c
