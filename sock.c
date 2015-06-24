@@ -3,14 +3,15 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <sys/socket.h> // socket(), bind()
+#include <arpa/inet.h> // htons()
+#include <netdb.h> // struct hostent
+
 int sock_conn(const char *host, const int port)
 {
   struct sockaddr_in client;
   struct hostent *he;
-  struct in_addr **addr_list;
-  struct servent *pse;
-  char ip[100];
-  int i, socket_desc;
+  int socket_desc;
 
   // Cria o socket
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);

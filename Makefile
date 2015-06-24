@@ -3,10 +3,12 @@ CFLAGS=-Wall -g
 LIBS=-lpthread
 CC=gcc
 
-server: ${DEP}
+all: server client
+
+server: ${DEP} server.o
 	${CC} ${CFLAGS} ${LIBS} ${DEP} $@.c -o $@
 
-client: ${DEP}
+client: ${DEP} client.o
 	${CC} ${CFLAGS} ${LIBS} ${DEP} $@.c -o $@
 
 %.o: %.c

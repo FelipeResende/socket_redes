@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include <sys/socket.h>
 #include "sock.h"
 #include "buffer.h"
 
@@ -14,10 +15,20 @@
 void *producer(void *);
 void *consumer(void *);
 
-int main()
+int port;
+
+int main(int argc, char *argv[])
 {
   buffer *b = malloc(sizeof(buffer));
   pthread_t pthread_consumidor, pthread_produtor;
+
+  if (argc != 2)
+  {
+    printf("Usage: %s port\n", argv[0]);
+    return 1;
+  }
+  port = atoi(argv[1]);
+
   initBuffer(b);
 
   check(pthread_create(&pthread_produtor, NULL, producer, (void *)b), "ERROR creating thread producer!!\n");
@@ -34,7 +45,7 @@ int main()
 void *producer(void *b)
 {
   buffer *pb = (buffer *)b;
-  int n = sock_bind(8000, 3);
+  int n = sock_bind(port, 3);
   int n_client = sock_accept(n);
   int read_size;
   char m;
@@ -44,7 +55,7 @@ void *producer(void *b)
 
   while ( (read_size = recv(n_client, &m, 1, 0)) > 0 )
   {
-    printf("Server producer: %c\n", m);
+    /*printf("Server producer: %c\n", m);*/
     pb->insert(pb, m);
   }
   return NULL;
@@ -56,7 +67,8 @@ void *consumer(void *b)
   while (1)
   {
     char c = pb->get(pb);
-    printf("\t\tServer consumer: %c\n", c);
+    printf("%c", c);
+    fflush(stdout);
   }
 
   return NULL;

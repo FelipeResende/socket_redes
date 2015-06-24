@@ -36,3 +36,10 @@
 
 # Documents
 *.doc*
+
+# Swp files
+*.swp
+
+# Executables
+client
+server
