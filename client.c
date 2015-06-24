@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
+
+#include "sock.h"
 #include "buffer.h"
 
 void *producer(void *);
@@ -44,6 +46,9 @@ void *producer(void * d)
 void *consumer(void *d)
 {
   buffer *pb = (buffer *)d;
+  int s = sock_conn("localhost", "8000", "tcp");
+  if (s < 0)
+    printf("Erro s menor que zero!\n");
   for (int i = 0; i < sizeof(texto) - 1; ++i)
   {
     char c = pb->get(pb);

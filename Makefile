@@ -1,8 +1,16 @@
-client: buffer.o client.c
-	gcc -Wall -g -lpthread $^ -o $@.out
+DEP=buffer.o sock.o
+CFLAGS=-Wall -g
+LIBS=-lpthread
+CC=gcc
+
+server: ${DEP}
+	${CC} ${CFLAGS} ${LIBS} ${DEP} $@.c -o $@
+
+client: ${DEP}
+	${CC} ${CFLAGS} ${LIBS} ${DEP} $@.c -o $@
 
 %.o: %.c
 	gcc -Wall -c $^
 
 clean:
-	rm *.o client client2
+	rm -f *.o client server
