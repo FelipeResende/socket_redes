@@ -16,7 +16,7 @@
 #define	INADDR_NONE	0xffffffff
 #endif	/* INADDR_NONE */
 
-int sock_conn(const char *host, const char *service, const char *transport);
+int sock_conn(const char *host, const int port);
 int sock_bind(int port, int n_connections);
 int sock_accept(int sock_desc);
 

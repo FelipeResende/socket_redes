@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
-int sock_conn(const char *host, const char *service, const char *transport)
+int sock_conn(const char *host, const int port)
 {
   struct sockaddr_in client;
   struct hostent *he;
@@ -12,7 +12,6 @@ int sock_conn(const char *host, const char *service, const char *transport)
   char ip[100];
   int i, socket_desc;
 
-  client.sin_family = AF_INET;
   // Cria o socket
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -20,23 +19,16 @@ int sock_conn(const char *host, const char *service, const char *transport)
 
   // Pega o IP
   if ( (he = gethostbyname(host)) == NULL) return -1;
+  else memcpy(&client.sin_addr, he->h_addr, he->h_length);
 
-  addr_list = (struct in_addr **)he->h_addr_list;
+  client.sin_family = AF_INET;
+  client.sin_port = htons(port);
 
-  for (i = 0; addr_list[i] != NULL; i++)
+  if (connect(socket_desc, (struct sockaddr *)&client, sizeof(client)) < 0)
   {
-    strcpy(ip, inet_ntoa(*addr_list[i]));
+    puts("Connect error!");
   }
-
-  // Pega a porta
-  if ((pse = getservbyname(service, transport)))
-    client.sin_port = pse->s_port;
-  else
-    printf("Erro para achar a porta!\n");
-
-  printf("Porta num: %d\n", client.sin_port);
-
-  return 0;
+  return socket_desc;
 }
 
 int sock_bind(int port, int n_connections)
