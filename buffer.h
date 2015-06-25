@@ -1,7 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#define TAM_BUFFER 1
+#define TAM_BUFFER 10
 
 #include<semaphore.h>
 typedef struct buffer buffer;

@@ -23,7 +23,6 @@ buffer b;
 
 int main(int argc, char *argv[])
 {
-  /*buffer *b = malloc(sizeof(buffer));*/
   pthread_t pthread_consumidor, pthread_produtor;
 
   if (argc != 2)
@@ -48,7 +47,6 @@ int main(int argc, char *argv[])
 void *producer()
 {
   int n = sock_bind(port, MAX_THREADS);
-  /*int n_client = sock_accept(n);*/
   int n_clients[MAX_THREADS];
   pthread_t n_threads[MAX_THREADS];
 
@@ -59,23 +57,20 @@ void *producer()
       pthread_exit(NULL);
 
     check(pthread_create(&n_threads[i], NULL, receiver_handler, (void *)&n_clients[i]), "Nao foi possivel criar a thread.\n");
-    printf("thrd %d", i);
   }
 
-  for (int i = 0; i < MAX_THREADS; i++) check(pthread_join(n_threads[i], NULL), "Error"); 
+  for (int i = 0; i < MAX_THREADS; i++) check(pthread_join(n_threads[i], NULL), "Error joining threads"); 
 
   return NULL;
 }
 
 void *receiver_handler(void *n)
 {
-  static int count = 0;
   int n_client = *(int *)n;
   int read_size;
   char m;
   buffer *pb = &b;
 
-  printf("Thread %d\n", count++);
   while ( (read_size = recv(n_client, &m, 1, 0)) > 0 )
   {
     pb->insert(pb, m);
