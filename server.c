@@ -69,12 +69,12 @@ void *receiver_handler(void *n)
 {
   int n_client = *(int *)n;
   int read_size;
-  char m;
+  buffer_element elem;
   buffer *pb = &b;
 
-  while ( (read_size = recv(n_client, &m, 1, 0)) > 0 )
+  while ( (read_size = recv(n_client, &elem, sizeof(elem), 0)) > 0 )
   {
-    pb->insert(pb, m);
+    pb->insert(pb, elem);
   }
 
   return NULL;
@@ -86,8 +86,10 @@ void *consumer()
 
   while (1)
   {
-    char c = pb->get(pb);
-    fputc(c, fr);
+    buffer_element elem = pb->get(pb);
+    fseek(fr, elem.pos, SEEK_SET);
+    fwrite(&elem.c, sizeof(char), 1, fr);
+    //fputc(c, fr);
     //printf("%c %d", c, escreveu);
     fflush(fr);
   }

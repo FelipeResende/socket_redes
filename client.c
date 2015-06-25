@@ -15,7 +15,6 @@ char texto[] = "Texto a ser escrito no buffer para testes...";
 int port;
 char file_name[200];
 FILE *fr;
-
 buffer b;
 
 #define check(A,msg) \
@@ -47,21 +46,23 @@ int main(int argc, char *argv[])
   check(pthread_join(pthread_consumidor, NULL), "ERROR joining thread consumer")
 
   destructBuffer(&b);
-
   pthread_exit(NULL);
   return 1;
 }
 
 void *producer()
 {
-  char c;
+  buffer_element elem;
   buffer *pb = &b;
   fr = fopen (file_name, "rb");
-  c = fgetc(fr);
-  while( c != EOF )
+  
+  elem.pos = ftell(fr);
+  elem.c = "a";
+  
+  while( elem.c != EOF )
   {
-    pb->insert(pb, c);
-    c = fgetc(fr); 
+    elem.c = fgetc(fr); 
+    pb->insert(pb, elem);
   }
   fclose(fr);  /* close the file prior to exiting the routine */
   return 0;
@@ -89,13 +90,15 @@ void *transmitter_handler()
   if (s < 0)
     printf("Erro: s menor que zero!\n");
 
-  char c = 'c';
-  while ((c  = pb->get(pb)) != EOF)
+  buffer_element elem;
+  elem  = pb->get(pb);
+  while (elem.c != EOF)
   {
-    if (send(s, &c, 1, 0) < 0)
+    if (send(s, &elem, sizeof(elem), 0) < 0)
     {
       puts("Send failed\n");
     }
+    elem  = pb->get(pb);
   }
   return NULL;
 }
