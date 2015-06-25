@@ -90,14 +90,12 @@ void *transmitter_handler()
     printf("Erro: s menor que zero!\n");
 
   char c = 'c';
-  while (c != EOF)
+  while ((c  = pb->get(pb)) != EOF)
   {
-    c = pb->get(pb);
     if (send(s, &c, 1, 0) < 0)
     {
       puts("Send failed\n");
     }
   }
-  /*close(s);*/
   return NULL;
 }

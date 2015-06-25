@@ -18,6 +18,7 @@ void *consumer();
 void *receiver_handler(void *n);
 
 int port;
+FILE *fr;
 
 buffer b;
 
@@ -81,11 +82,14 @@ void *receiver_handler(void *n)
 void *consumer()
 {
   buffer *pb = &b;
+  fr = fopen ("serverdisco", "wb");
+
   while (1)
   {
     char c = pb->get(pb);
-    printf("%c", c);
-    fflush(stdout);
+    fputc(c, fr);
+    //printf("%c %d", c, escreveu);
+    fflush(fr);
   }
 
   return NULL;
