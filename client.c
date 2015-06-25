@@ -12,6 +12,7 @@ void *consumer(void *);
 
 char texto[] = "Texto a ser escrito no buffer para testes...";
 int port;
+FILE *fr;
 
 #define check(A,msg) \
   if ((A)) { \
@@ -46,12 +47,18 @@ int main(int argc, char *argv[])
 
 void *producer(void * d)
 {
+  char c;
   buffer *pb = (buffer *)d;
-  for (int i = 0; i < sizeof(texto) - 1; ++i)
+  fr = fopen ("disco", "rt");
+  c = fgetc(fr);
+  while( c != EOF )
   {
-    /*printf("Producer: %c\n", texto[i]);*/
-    pb->insert(pb, texto[i]);
+    //printf("Producer: %c\n", ch);
+    pb->insert(pb, c);
+    c = fgetc(fr); 
   }
+  pb->insert(pb, c);
+  fclose(fr);  /* close the file prior to exiting the routine */
   return 0;
 }
 void *consumer(void *d)
@@ -62,14 +69,16 @@ void *consumer(void *d)
     printf("Erro: s menor que zero!\n");
 
   printf("2\n");
-  while (1)
+  char c = 'c';
+  while (1 && c != EOF)
   {
-    char c = pb->get(pb);
+    c = pb->get(pb);
     /*printf("\t\tConsumer: %c\n", c);*/
     if (send(s, &c, 1, 0) < 0)
     {
       puts("Send failed\n");
     }
   }
+  close(s);
   return 0;
 }
