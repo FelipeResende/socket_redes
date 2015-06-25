@@ -49,7 +49,7 @@ void *producer(void * d)
 {
   char c;
   buffer *pb = (buffer *)d;
-  fr = fopen ("disco", "rt");
+  fr = fopen ("disco", "rb");
   c = fgetc(fr);
   while( c != EOF )
   {
@@ -70,15 +70,13 @@ void *consumer(void *d)
 
   printf("2\n");
   char c = 'c';
-  while (1 && c != EOF)
+  while ( (c  = pb->get(pb)) != EOF)
   {
-    c = pb->get(pb);
     /*printf("\t\tConsumer: %c\n", c);*/
     if (send(s, &c, 1, 0) < 0)
     {
       puts("Send failed\n");
     }
   }
-  close(s);
   return 0;
 }
