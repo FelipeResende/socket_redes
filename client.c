@@ -23,7 +23,7 @@ buffer b;
     exit(1); \
   }
     
-#define MAX_THREADS 10
+#define MAX_THREADS 2
 int main(int argc, char *argv[])
 {
   pthread_t pthread_consumidor, pthread_produtor;
@@ -56,11 +56,11 @@ void *producer()
   buffer *pb = &b;
   fr = fopen (file_name, "rb");
   
-  elem.pos = ftell(fr);
-  elem.c = "a";
+  elem.c = 'a';
   
   while( elem.c != EOF )
   {
+    elem.pos = ftell(fr);
     elem.c = fgetc(fr); 
     pb->insert(pb, elem);
   }

@@ -3,7 +3,9 @@
 buffer_element getElemFromBuffer(buffer *b)
 {
   sem_wait(&b->full);
-  buffer_element ret = *(b->head);
+  buffer_element ret;
+  ret.c = b->head->c;
+  ret.pos = b->head->pos;
   b->head = incrementa(b, b->head);
   sem_post(&b->empty);
   return ret;
@@ -12,7 +14,8 @@ buffer_element getElemFromBuffer(buffer *b)
 void insertElemInBuffer(buffer *b, buffer_element elem)
 {
   sem_wait(&b->empty);
-  *(b->tail) = elem;
+  b->tail->c = elem.c;
+  b->tail->pos = elem.pos;
   b->tail = incrementa(b, b->tail);
   sem_post(&b->full);
 }

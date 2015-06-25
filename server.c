@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
 
 #include <sys/socket.h>
 #include "sock.h"
@@ -21,17 +22,20 @@ int port;
 FILE *fr;
 
 buffer b;
+char filename[200];
 
 int main(int argc, char *argv[])
 {
   pthread_t pthread_consumidor, pthread_produtor;
 
-  if (argc != 2)
+  if (argc != 3)
   {
-    printf("Usage: %s port\n", argv[0]);
+    printf("Usage: %s port filename\n", argv[0]);
     return 1;
   }
   port = atoi(argv[1]);
+  strncpy(filename, argv[2], 199);
+  filename[199] = '\0';
 
   initBuffer(&b);
 
@@ -82,7 +86,7 @@ void *receiver_handler(void *n)
 void *consumer()
 {
   buffer *pb = &b;
-  fr = fopen ("serverdisco", "wb");
+  fr = fopen (filename, "w");
 
   while (1)
   {
