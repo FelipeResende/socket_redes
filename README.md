@@ -6,6 +6,6 @@ Trabalho de redes - PCS 2025
 
 ####Usage:
 
-`./server port filename`
+`./server port filename nthreads`
 
-`./client port filename`
+`./client port filename nthreads`

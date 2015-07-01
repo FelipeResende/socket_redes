@@ -12,7 +12,7 @@ client: ${DEP} client.o
 	${CC} ${CFLAGS} ${LIBS} ${DEP} $@.c -o $@
 
 %.o: %.c
-	gcc -Wall -c $^
+	gcc ${CFLAGS} -c $^
 
 clean:
 	rm -f *.o client server
