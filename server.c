@@ -72,7 +72,7 @@ void *producer()
 
   for (int i = 0; i < MAX_THREADS; i++) check(pthread_join(n_threads[i], NULL), "Error joining threads"); 
   elem.c = EOF;
-  elem.pos = 0;
+  elem.pos = -1;
   pb->insert(pb, elem);
   pthread_exit(NULL);
 }
@@ -84,10 +84,11 @@ void *receiver_handler(void *n)
   buffer_element elem;
   buffer *pb = &b;
 
+  read_size = recv(n_client, &elem, sizeof(elem), 0);
   while ( read_size > 0 )
   {
-    read_size = recv(n_client, &elem, sizeof(elem), 0);
     pb->insert(pb, elem);
+    read_size = recv(n_client, &elem, sizeof(elem), 0);
   }
   pthread_exit(NULL);
 }
@@ -96,7 +97,7 @@ void *consumer()
   buffer *pb = &b;
   fr = fopen (filename, "wb");
   buffer_element elem = pb->get(pb);
-  while (elem.c != EOF)
+  while (elem.pos != -1)
   {
     fseek(fr, elem.pos, SEEK_SET);
     fwrite(&elem.c, sizeof(char), 1, fr);
