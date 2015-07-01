@@ -1,7 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#define TAM_BUFFER 10
+#define TAM_BUFFER 1000
 
 #include<semaphore.h>
 typedef struct buffer buffer;
@@ -19,6 +19,8 @@ struct buffer
   buffer_element *head, *tail;
   sem_t empty;
   sem_t full;
+  sem_t mutex_head;
+  sem_t mutex_tail;
   buffer_element (*get)(struct buffer *b);
   void (*insert)(struct buffer *b, buffer_element c);
 };
