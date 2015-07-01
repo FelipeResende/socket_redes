@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <time.h>
 
 #include <sys/socket.h>
 #include "sock.h"
@@ -13,7 +14,7 @@
     exit(1); \
   }
 
-#define MAX_THREADS 10
+int MAX_THREADS;
 void *producer();
 void *consumer();
 void *receiver_handler(void *n);
@@ -28,21 +29,24 @@ int main(int argc, char *argv[])
 {
   pthread_t pthread_consumidor, pthread_produtor;
 
-  if (argc != 3)
+  if (argc != 4)
   {
-    printf("Usage: %s port filename\n", argv[0]);
+    printf("Usage: %s port filename nthreads\n", argv[0]);
     return 1;
   }
   port = atoi(argv[1]);
   strncpy(filename, argv[2], 199);
   filename[199] = '\0';
+  MAX_THREADS = atoi(argv[3]);
 
   initBuffer(&b);
 
+  // Iniciar medicao aqui
   check(pthread_create(&pthread_produtor, NULL, producer, NULL), "ERROR creating thread producer!!\n");
   check(pthread_create(&pthread_consumidor, NULL, consumer, NULL), "ERROR creating thread consumer!!\n")
   check(pthread_join(pthread_produtor, NULL), "ERROR joining thread producer")
   check(pthread_join(pthread_consumidor, NULL), "ERROR joining thread consumer")
+  // Terminar medicao aqui
 
   destructBuffer(&b);
 
@@ -53,6 +57,8 @@ void *producer()
 {
   int n = sock_bind(port, MAX_THREADS);
   int n_clients[MAX_THREADS];
+  buffer_element elem;
+  buffer *pb = &b;
   pthread_t n_threads[MAX_THREADS];
 
   for (int i = 0; i < MAX_THREADS; i++)
@@ -61,42 +67,42 @@ void *producer()
     if (n < 0 || n_clients[i] < 0)
       pthread_exit(NULL);
 
-    check(pthread_create(&n_threads[i], NULL, receiver_handler, (void *)&n_clients[i]), "Nao foi possivel criar a thread.\n");
+    check(pthread_create(&n_threads[i], NULL, receiver_handler, (void *)&n_clients[i]), "It was not possible to create the thread.\n");
   }
 
   for (int i = 0; i < MAX_THREADS; i++) check(pthread_join(n_threads[i], NULL), "Error joining threads"); 
-
-  return NULL;
+  elem.c = EOF;
+  elem.pos = 0;
+  pb->insert(pb, elem);
+  pthread_exit(NULL);
 }
 
 void *receiver_handler(void *n)
 {
   int n_client = *(int *)n;
-  int read_size;
+  int read_size = 1;
   buffer_element elem;
   buffer *pb = &b;
 
-  while ( (read_size = recv(n_client, &elem, sizeof(elem), 0)) > 0 )
+  while ( read_size > 0 )
   {
+    read_size = recv(n_client, &elem, sizeof(elem), 0);
     pb->insert(pb, elem);
   }
-
-  return NULL;
+  pthread_exit(NULL);
 }
 void *consumer()
 {
   buffer *pb = &b;
-  fr = fopen (filename, "w");
-
-  while (1)
+  fr = fopen (filename, "wb");
+  buffer_element elem = pb->get(pb);
+  while (elem.c != EOF)
   {
-    buffer_element elem = pb->get(pb);
     fseek(fr, elem.pos, SEEK_SET);
     fwrite(&elem.c, sizeof(char), 1, fr);
-    //fputc(c, fr);
-    //printf("%c %d", c, escreveu);
-    fflush(fr);
+    elem = pb->get(pb);
   }
+  fclose(fr);
 
   return NULL;
 }
