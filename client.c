@@ -59,16 +59,19 @@ void *producer()
 {
   buffer_element elem;
   buffer *pb = &b;
+  int n_read;
   fr = fopen (file_name, "rb");
   
-  elem.c = 'a';
-  
-  while( elem.c != EOF )
+  elem.pos = ftell(fr);
+  n_read = fread(&elem.c, sizeof(char), 1, fr);
+  while(n_read != 0)
   {
-    elem.pos = ftell(fr);
-    elem.c = fgetc(fr);
     pb->insert(pb, elem);
+    elem.pos = ftell(fr);
+    n_read = fread(&elem.c, sizeof(char), 1, fr);
   }
+  elem.c = EOF;
+  elem.pos = -1;
   for (int i = 0; i < MAX_THREADS; i++)
   {
     pb->insert(pb, elem);
@@ -96,18 +99,16 @@ void *transmitter_handler()
   buffer *pb = &b;
   int s = sock_conn("localhost", port);
   if (s < 0)
-    printf("Erro: s menor que zero!\n");
+    printf("Error: Couldn't connect to localhost at port %d!\n", port);
 
   buffer_element elem;
   elem  = pb->get(pb);
-  while (elem.c != EOF)
+  while (elem.pos != -1)
   {
-    // Iniciar medicao de tempo aqui
     if (send(s, &elem, sizeof(elem), 0) < 0)
     {
-      puts("Send failed\n");
+      printf("Send failed\n");
     }
-    // Terminar medicao de tempo aqui
     elem = pb->get(pb);
   }
   close(s);
